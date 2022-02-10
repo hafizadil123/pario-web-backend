@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { sendPasswordResetEmail, reigstrationEmailTemplate } from './emails';
+import { sendPasswordResetEmail, registerMail } from './emails';
 
 export const sendResetPassEmail = (user, link) => {
 	// create reusable transporter object using the default SMTP transport
@@ -46,7 +46,7 @@ export const sendRegistrationEmail = (user, link) => {
 		to: [ user.email ], // list of receivers
 		subject: 'Register User', // Subject line
 		//text: 'Hello world?', // plain text body
-		html: '<h1>registraiton form</h1>' // html body
+		html: registerMail(user, link) // html body
 	};
 
 	// send mail with defined transport object

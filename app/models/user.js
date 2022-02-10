@@ -7,11 +7,19 @@ const userSchema = new Schema({
 		type: String,
 		required: [ true, 'First name is required' ]
 	},
+	lastName: {
+		type: String,
+		required: [ true, 'Last name is required' ]
+	},
 	email: {
 		type: String,
 		trim: true,
 		lowercase: true,
 		required: [ true, 'Email is required' ]
+	},
+	provider: {
+		type: String,
+		default: 'web'
 	},
 	password: {
 		type: String,

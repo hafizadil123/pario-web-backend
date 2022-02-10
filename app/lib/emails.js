@@ -1,6 +1,9 @@
 export const sendPasswordResetEmail = (user, link) =>
 	`Hi <strong>${user.firstName} ${user.lastName}!</strong><br> Here is Your Reset Password Link, Please Click: <strong><a href='${link}'>Here</a></strong> Which is only valid for 2 minutes `;
 
+    export const registerMail = (user, link) =>
+	`Hi <strong>${user.firstName} ${user.lastName}!</strong><br> Thanks for your registration please click to verify your account: <strong><a href='${link}'>Here</a></strong> Which is only valid for 2 minutes `;
+
 export const reigstrationEmailTemplate = (user, link) => `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
 xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
 <head>
