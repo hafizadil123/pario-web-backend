@@ -9,9 +9,13 @@
     "start": "nodemon",
     "test": "NODE_ENV=test mocha --recursive --reporter spec --compilers js:babel-register tests",
     "lint": "eslint app",
+    
     "test:watch": "nodemon --exec 'npm run test' tests",
     "coverage": "NODE_ENV=test babel-node ./node_modules/.bin/isparta cover _mocha -- --recursive --reporter spec --compilers js:babel-register tests",
     "validate": "npm run test && npm outdated --depth 0"
+  },
+  "engines": {
+    "node": "12.18.0"
   },
   "repository": {
     "type": "git",
