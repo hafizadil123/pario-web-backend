@@ -7,7 +7,7 @@ export const sendResetPassEmail = (user, link) => {
 		service: 'Gmail',
 		auth: {
 			user: 'ahafiz167@gmail.com', // generated ethereal user
-			pass: 'Domain://0314' // generated ethereal password
+			pass: 'hadiil!php' // generated ethereal password
 		}
 	});
 
@@ -36,7 +36,7 @@ export const sendRegistrationEmail = (user, link) => {
 		service: 'Gmail',
 		auth: {
 			user: 'ahafiz167@gmail.com', // generated ethereal user
-			pass: 'Domain://0314' // generated ethereal password
+			pass: 'hadiil!php' // generated ethereal password
 		}
 	});
 
