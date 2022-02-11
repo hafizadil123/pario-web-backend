@@ -6,8 +6,8 @@ export const sendResetPassEmail = (user, link) => {
 	let transporter = nodemailer.createTransport({
 		service: 'Gmail',
 		auth: {
-			user: 'ahafiz167@gmail.com', // generated ethereal user
-			pass: 'hadiil!php' // generated ethereal password
+			user: 'testingtanmay28@gmail.com', // generated ethereal user
+			pass: 'ananye20' // generated ethereal password
 		}
 	});
 
@@ -35,8 +35,8 @@ export const sendRegistrationEmail = (user, link) => {
 	let transporter = nodemailer.createTransport({
 		service: 'Gmail',
 		auth: {
-			user: 'ahafiz167@gmail.com', // generated ethereal user
-			pass: 'hadiil!php' // generated ethereal password
+			user: 'testingtanmay28@gmail.com', // generated ethereal user
+			pass: 'ananye20' // generated ethereal password
 		}
 	});
 
