@@ -12,11 +12,34 @@ class UsersController extends BaseController {
 		'password',
 		'lastName',
 		'provider'
+	
 	];
 	secretKey = Constants.security.sessionSecret || 'i-am-the-secret-key-of-pario-web-backend-project';
-	links = {
-		registerLink: 'http://localhost:3000/active'
-	}
+	_populate = async (req, res, next) => {
+		const { body: { email } } = req;
+		try {
+			const user = await User.findOne({ email });
+			if (!user) {
+				next();
+				res.status(404).json({ message: 'user is not exist!' });
+			}
+
+			req.user = user;
+			next();
+		} catch (err) {
+			next(err);
+		}
+	};
+
+	search = async (_req, res, next) => {
+		try {
+			// @TODO Add pagination
+			res.json(await User.find());
+		} catch (err) {
+			next(err);
+		}
+	};
+
 	fetch = (req, res) => {
 		const user = req.user || req.currentUser;
 
@@ -30,9 +53,9 @@ class UsersController extends BaseController {
 	create = async (req, res, next) => {
 		const params = this.filterParams(req.body, this.whitelist);
 		let user = await User.findOne({ email: params.email });
-		if (user) {
-			return res.status(200).json({ message: 'User already exists', success: false, user });
-		}
+	    if (user) {
+	      return res.status(200).json({ message: 'User already exists', success: false, user });
+	    }
 		let newUser = new User({
 			...params,
 			provider: 'local',
@@ -40,7 +63,7 @@ class UsersController extends BaseController {
 		});
 		try {
 			const user = await newUser.save();
-			const link = this.links.registerLink;
+			const link = `http://localhost:3000/active`;
 			sendRegistrationEmail(user, link);
 			const payload = {
 				user: {
@@ -65,26 +88,42 @@ class UsersController extends BaseController {
 		try {
 			const user = await User.findById({ _id: userId });
 			if (!user) {
-				return res.status(200).json({ message: Constants.messages.userNotFound, success: false });
+			return res.status(200).json({ message: Constants.messages.userNotFound, success: false });
 			}
-
+		
 			const salt = await bcrypt.genSalt(10);
 			const updatedUser = await User.findByIdAndUpdate(
 				userId,
 				{
 					$set: {
-						password: await bcrypt.hash(password, salt),
+					password: await bcrypt.hash(password, salt),
 					},
 				},
 				{ new: true },
 			).select('-password');
 			return res.status(200).json({ message: 'password has been updated, please wait we are redirecting to login page...', success: true, user: updatedUser });
-
+			
 		} catch (err) {
 			err.status = 400;
 			next(err);
 		}
 	};
+
+	
+	delete = async (req, res, next) => {
+		if (!req.currentUser) {
+			return res.sendStatus(403);
+		}
+
+		try {
+			await req.currentUser.remove();
+			res.sendStatus(204);
+		} catch (err) {
+			next(err);
+		}
+	};
+
+
 
 	login = async (req, res, next) => {
 		const { email, password, provider = 'web' } = req.body;
@@ -97,9 +136,9 @@ class UsersController extends BaseController {
 			if (!user) {
 				return res.status(200).json({ message: 'Invalid Credentials', success: false });
 			}
-			if (provider === 'google') {
-				const isGoogleUser = await User.findOne({ email });
-
+			if(provider === 'google') {
+				const isGoogleUser = await User.findOne({ email  });
+			
 				const payload = {
 					user: {
 						id: isGoogleUser.id,
@@ -107,12 +146,12 @@ class UsersController extends BaseController {
 						role: isGoogleUser.role
 					}
 				};
-				if (isGoogleUser) {
+				if(isGoogleUser) {
 					jwt.sign(payload, this.secretKey, { expiresIn: '1h' }, (err, token) => {
 						if (err) throw err;
 						res.status(200).json({ token, success: true, user: isGoogleUser });
 					});
-
+					
 				}
 			}
 			const isMatch = await bcrypt.compare(password, user.password);
@@ -184,6 +223,47 @@ class UsersController extends BaseController {
 		}
 	};
 
+	profileUser = async (req, res, next) => {
+		try {
+		const { id } = req.params;
+		console.log(id);
+		const user = await User.findById({ _id: id });
+		if (user) {
+			return res.status(200).json({ message: 'fetching done', user, success: 1 });
+		}
+		} catch (err) {
+			err.status = 404;
+			next(err)
+	}
+	}
+	resetPassword = async (req, res, next) => {
+		const { oldPassword, newPassword } = req.body;
+
+		try {
+			const user = await User.findById({ _id: req.user.id });
+			if (!user) {
+				return res.status(400).json({ message: 'User Not Found!' });
+			}
+			const isMatch = await bcrypt.compare(oldPassword, user.password);
+			if (isMatch) {
+				const salt = await bcrypt.genSalt(10);
+				const updateUserPassword = await User.findByIdAndUpdate(
+					req.user.id,
+					{
+						$set: {
+							password: await bcrypt.hash(newPassword, salt)
+						}
+					},
+					{ new: true }
+				);
+				return res.status(200).json({ message: 'Password Changed Successfully!' });
+			}
+			return res.status(400).json({ message: 'Invalid Password' });
+		} catch (err) {
+			err.status = 400;
+			next(err);
+		}
+	};
 }
 
 export default new UsersController();
