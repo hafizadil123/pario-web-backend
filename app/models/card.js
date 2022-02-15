@@ -8,7 +8,7 @@ var schema = new mongoose.Schema({
     },
     wbs : {
         type:String,
-        required: true,
+        default: null,
     },
     cardName : {
         type: String,
