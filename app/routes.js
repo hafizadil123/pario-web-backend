@@ -17,11 +17,12 @@ routes.get('/api/users/user/:id', UsersController.profileUser);
 
 //card
 
-routes.post('/api/cards', authenticate, CardsController.create);
-routes.get('/api/cards', authenticate, CardsController.findAll);
-routes.put('/api/cards/:id', authenticate, CardsController.update);
+routes.post('/api/cards',authenticate, CardsController.create);
+routes.get('/api/cards', authenticate,CardsController.findAll);
+routes.put('/api/cards', CardsController.update);
 routes.get('/api/cards/:id', authenticate, CardsController.findOne);
-routes.delete('/api/cards/:id',authenticate, CardsController.delete);
+routes.delete('/api/cards', CardsController.delete);
+
 
 
 routes.use(errorHandler);

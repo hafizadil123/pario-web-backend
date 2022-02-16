@@ -9,6 +9,52 @@ class CardsController extends BaseController {
         'cardName',
         'parentCard'
     ];
+
+     ifNoParent = () => {
+
+     }
+     populateWBS = async (data) => {
+        const { parentCard } = data;
+        if(!parentCard) {
+            // get next wbs
+            const getCurrentWBS = await Card.find({}).select('wbs').sort({wbs: 'desc'}).exec();
+            if(getCurrentWBS && getCurrentWBS.length > 0) {
+                const [highestWbs] = getCurrentWBS || [];
+                if(highestWbs.wbs){
+                    const firstIndex = +(highestWbs.wbs.split('.')[0]);
+                    const res = (firstIndex + 1).toString() + '.' + highestWbs.wbs.split('.')[1];
+                    return res;
+                } 
+            }  
+            return '1.0';
+           
+        }
+        else  {
+            const getParentWbs = await Card.find({parentCard: parentCard}).select('wbs').sort({wbs: 'desc'}).exec();
+                if(getParentWbs && getParentWbs.length === 0) {
+                    const getCurrentWBS = await Card.find({}).select('wbs').sort({wbs: 'desc'}).exec();
+                    if(getCurrentWBS && getCurrentWBS.length > 0) {
+                        const [highestWbs] = getCurrentWBS || [];
+                        if(highestWbs.wbs){
+                            const firstIndex = +(highestWbs.wbs.split('.')[0]);
+                            const res = (firstIndex + 1).toString() + '.' + highestWbs.wbs.split('.')[1];
+                            return res;
+                        } 
+                    }  
+                } else {
+                    console.log('getParentWbs', getParentWbs)
+                    const [highestWbss] = getParentWbs || [];
+
+                    const current = highestWbss.wbs.split('.')[0];
+                    let next = highestWbss.wbs.split('.')[1];
+                    next = ++next;
+                    return current + '.' + next;
+                }
+               
+         
+        }
+    }  
+
     create = async (req, res) => {
         // validate request
         if (!req.body) {
@@ -17,23 +63,28 @@ class CardsController extends BaseController {
         }
         const params = this.filterParams(req.body, this.whitelist);
         // new card
+        const wbs = await this.populateWBS(params);
+        console.log('updated wbs', wbs);
+        // return res.status(200).json({msg: 'tep'})
+
         const card = new Card({
             ...params,
-            userId: req.user.id
+            userId: req.user.id,
+            wbs: wbs,
         })
 
         // save card in the database
         const newCard = await card.save(card)
         if (newCard) {
-            return res.status(200).json({ message: 'card saved successfully', details: newCard });
+            return res.status(200).json({ message: 'card saved successfully', success: true, details: newCard });
         }
-        return res.status(200).json({ message: 'issue with card creation' })
+        return res.status(200).json({ message: 'issue with card creation', success: false})
     }
 
     // retrieve and return all card/ retrive and return a single card
     findAll = async (req, res) => {
           const userId = req.user.id;
-          const cards = await Card.find({userId: userId}).populate('parentCard').exec();
+          const cards = await Card.find({userId: userId});
           if (cards) {
               return res.status(200).json({ message: 'card fetched successfully', details: cards });
           }
@@ -49,7 +100,8 @@ class CardsController extends BaseController {
                 .send({ message: "Data to update can not be empty" })
         }
 
-        const id = req.params.id;
+        const { id } = req.query;
+        console.log('id', id);
         Card.findByIdAndUpdate(id, req.body, { useFindAndModify: false, new: true})
             .then(data => {
                 if (!data) {
@@ -85,8 +137,8 @@ class CardsController extends BaseController {
     }
     // Delete a card with specified card id in the request
     delete = (req, res) => {
-        const id = req.params.id;
-
+        const { id } = req.query;
+        console.log('id', id);
         Card.findByIdAndDelete(id)
             .then(data => {
                 if (!data) {

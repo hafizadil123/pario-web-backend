@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 
 var schema = new mongoose.Schema({
     id : {
-        type : String,
-        required: true
+        type : Number,
+        default: 1
     },
     wbs : {
         type:String,
-        default: null,
+        default: '1.0',
     },
     cardName : {
         type: String,
@@ -24,6 +24,20 @@ var schema = new mongoose.Schema({
     }
 })
 
-const cards = mongoose.model('cards', schema);
 
+
+
+schema.pre('save', function(next) {
+    var doc = this;
+    cards.find({}).select('id').sort({id: 'desc'}).then(res => {
+     console.log(res[0])
+     doc.id = res[0].id + 1
+     cards.findOneAndUpdate({_id: doc._id}, doc).then(s => {
+         next();
+     })
+    })
+   
+ next();
+});
+const cards = mongoose.model('cards', schema);
 module.exports = cards;
