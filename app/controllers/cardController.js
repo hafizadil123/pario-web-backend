@@ -10,9 +10,6 @@ class CardsController extends BaseController {
         'parentCard'
     ];
 
-     ifNoParent = () => {
-
-     }
      populateWBS = async (data) => {
         const { parentCard } = data;
         if(!parentCard) {
@@ -31,20 +28,18 @@ class CardsController extends BaseController {
         }
         else  {
             const getParentWbs = await Card.find({parentCard: parentCard}).select('wbs').sort({wbs: 'desc'}).exec();
-                if(getParentWbs && getParentWbs.length === 0) {
+            if(getParentWbs && getParentWbs.length === 0) {
                     const getCurrentWBS = await Card.find({}).select('wbs').sort({wbs: 'desc'}).exec();
                     if(getCurrentWBS && getCurrentWBS.length > 0) {
                         const [highestWbs] = getCurrentWBS || [];
                         if(highestWbs.wbs){
                             const firstIndex = +(highestWbs.wbs.split('.')[0]);
-                            const res = (firstIndex + 1).toString() + '.' + highestWbs.wbs.split('.')[1];
+                            const res = (firstIndex + 1).toString() + '.' + '1';
                             return res;
                         } 
                     }  
                 } else {
-                    console.log('getParentWbs', getParentWbs)
                     const [highestWbss] = getParentWbs || [];
-
                     const current = highestWbss.wbs.split('.')[0];
                     let next = highestWbss.wbs.split('.')[1];
                     next = ++next;
@@ -72,13 +67,18 @@ class CardsController extends BaseController {
             userId: req.user.id,
             wbs: wbs,
         })
-
+      
         // save card in the database
-        const newCard = await card.save(card)
-        if (newCard) {
-            return res.status(200).json({ message: 'card saved successfully', success: true, details: newCard });
+        const newCard = await card.save(card);
+        if(!params.parentCard) {
+            
+           const makeSelfParent = await Card.findByIdAndUpdate({_id: newCard._id}, {parentCard: newCard._id}, {new: true}).exec();
+           return res.status(200).json({ message: 'Card has been created successfully', success: true, details: makeSelfParent });
         }
-        return res.status(200).json({ message: 'issue with card creation', success: false})
+        if (newCard) {
+            return res.status(200).json({ message: 'Card has been created successfully', success: true, details: newCard });
+        }
+        return res.status(200).json({ message: 'Issue with card creation', success: false})
     }
 
     // retrieve and return all card/ retrive and return a single card
@@ -93,7 +93,8 @@ class CardsController extends BaseController {
     }
 
     // Update a new idetified card by card id
-    update = (req, res) => {
+    update = async (req, res) => {
+      
         if (!req.body) {
             return res
                 .status(400)
@@ -101,8 +102,18 @@ class CardsController extends BaseController {
         }
 
         const { id } = req.query;
-        console.log('id', id);
-        Card.findByIdAndUpdate(id, req.body, { useFindAndModify: false, new: true})
+        let wbs = '';
+        let updatedObj = {};
+
+        if(req.body.parentCard) {
+            wbs = await this.populateWBS(req.body);
+            console.log('adaddd', wbs, req.body)
+            updatedObj = {...req.body, wbs: wbs}
+        } else  {
+            updatedObj = {...req.body }
+        }
+    
+        Card.findByIdAndUpdate(id, updatedObj, { useFindAndModify: false, new: true})
             .then(data => {
                 if (!data) {
                     res.status(404).send({ message: `Cannot Update card with ${id}. Maybe card not found!` })

@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:4567/get-feedback-stats/",
+            "name": "Attach to Chrome",
+            "port": 5000,
+            "request": "attach",
+            "type": "pwa-chrome",
             "webRoot": "${workspaceFolder}"
         }
     ]
