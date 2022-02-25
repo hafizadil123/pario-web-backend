@@ -7,8 +7,7 @@ var schema = new mongoose.Schema({
         default: 1
     },
     wbs : {
-        type:String,
-        default: '1.0',
+        type:String
     },
     cardName : {
         type: String,
@@ -17,6 +16,30 @@ var schema = new mongoose.Schema({
     parentCard : {
         type: String,
         default: null,
+    },
+    estDuration : {
+        type: String,
+        required: true,
+    },
+    predecessor : {
+        type: String,
+        required: true,
+    },
+    successor : {
+        type: String,
+        required: true,
+    },
+    resource : {
+        type: String,
+        required: true,
+    },
+    effort : {
+        type: String,
+        required: true,
+    },
+    childrenCount: {
+       type: Number,
+       default: 0
     },
     userId : {
         type: mongoose.Types.ObjectId,

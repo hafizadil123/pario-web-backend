@@ -7,47 +7,26 @@ class CardsController extends BaseController {
         'id',
         'wbs',
         'cardName',
-        'parentCard'
+        'parentCard', 'estDuration', 'predecessor', 'successor', 'resource', 'effort'
     ];
 
      populateWBS = async (data) => {
         const { parentCard } = data;
         if(!parentCard) {
-            // get next wbs
-            const getCurrentWBS = await Card.find({}).select('wbs').sort({wbs: 'desc'}).exec();
-            if(getCurrentWBS && getCurrentWBS.length > 0) {
-                const [highestWbs] = getCurrentWBS || [];
-                if(highestWbs.wbs){
-                    const firstIndex = +(highestWbs.wbs.split('.')[0]);
-                    const res = (firstIndex + 1).toString() + '.' + highestWbs.wbs.split('.')[1];
-                    return res;
-                } 
-            }  
-            return '1.0';
-           
+            const count = await Card.find({parentCard: null}).count();
+            return (count + 1);
+
         }
-        else  {
-            const getParentWbs = await Card.find({parentCard: parentCard}).select('wbs').sort({wbs: 'desc'}).exec();
-            if(getParentWbs && getParentWbs.length === 0) {
-                    const getCurrentWBS = await Card.find({}).select('wbs').sort({wbs: 'desc'}).exec();
-                    if(getCurrentWBS && getCurrentWBS.length > 0) {
-                        const [highestWbs] = getCurrentWBS || [];
-                        if(highestWbs.wbs){
-                            const firstIndex = +(highestWbs.wbs.split('.')[0]);
-                            const res = (firstIndex + 1).toString() + '.' + '1';
-                            return res;
-                        } 
-                    }  
-                } else {
-                    const [highestWbss] = getParentWbs || [];
-                    const current = highestWbss.wbs.split('.')[0];
-                    let next = highestWbss.wbs.split('.')[1];
-                    next = ++next;
-                    return current + '.' + next;
-                }
-               
-         
-        }
+        
+        const parentCardNode = await Card.find({parentCard: parentCard});
+        const wbs = parentCardNode.wbs;
+        const childrenCount = parentCardNode.childrenCount;
+        const newChildrenCount = childrenCount + 1;
+        await Card.findByIdAndUpdate({_id: parentCard}, {childrenCount: newChildrenCount}, {new: true}).exec();
+        const wbsSplit = wbs.split('.');
+        const currentWbs = wbsSplit.slice(-1);
+        return wbs + '.' + newChildrenCount;
+
     }  
 
     create = async (req, res) => {
@@ -58,23 +37,22 @@ class CardsController extends BaseController {
         }
         const params = this.filterParams(req.body, this.whitelist);
         // new card
-        const wbs = await this.populateWBS(params);
-        console.log('updated wbs', wbs);
+        // const wbs = await this.populateWBS(params);
+        // console.log('updated wbs', wbs);
         // return res.status(200).json({msg: 'tep'})
 
         const card = new Card({
             ...params,
             userId: req.user.id,
-            wbs: wbs,
+            wbs: '1.0'
         })
       
         // save card in the database
         const newCard = await card.save(card);
-        if(!params.parentCard) {
-            
-           const makeSelfParent = await Card.findByIdAndUpdate({_id: newCard._id}, {parentCard: newCard._id}, {new: true}).exec();
-           return res.status(200).json({ message: 'Card has been created successfully', success: true, details: makeSelfParent });
-        }
+       
+        //    const makeSelfParent = await Card.findByIdAndUpdate({_id: parentCard}, {childrenCount: newCard._id}, {new: true}).exec();
+        //    return res.status(200).json({ message: 'Card has been created successfully', success: true, details: makeSelfParent });
+        
         if (newCard) {
             return res.status(200).json({ message: 'Card has been created successfully', success: true, details: newCard });
         }
@@ -106,9 +84,10 @@ class CardsController extends BaseController {
         let updatedObj = {};
 
         if(req.body.parentCard) {
-            wbs = await this.populateWBS(req.body);
-            console.log('adaddd', wbs, req.body)
-            updatedObj = {...req.body, wbs: wbs}
+            // wbs = await this.populateWBS(req.body);
+            // console.log('adaddd', wbs, req.body)
+            // updatedObj = {...req.body, wbs: wbs}
+            updatedObj = {...req.body }
         } else  {
             updatedObj = {...req.body }
         }
