@@ -19,23 +19,23 @@ var schema = new mongoose.Schema({
     },
     estDuration : {
         type: String,
-        required: true,
+
     },
     predecessor : {
         type: String,
-        required: true,
+
     },
     successor : {
         type: String,
-        required: true,
+   
     },
     resource : {
         type: String,
-        required: true,
+       
     },
     effort : {
         type: String,
-        required: true,
+   
     },
     childrenCount: {
        type: Number,
