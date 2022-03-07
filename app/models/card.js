@@ -37,6 +37,10 @@ var schema = new mongoose.Schema({
         type: String,
    
     },
+    parentId: {
+        type: Number,
+        default: 0
+     },
     childrenCount: {
        type: Number,
        default: 0
