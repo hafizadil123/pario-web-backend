@@ -79,20 +79,24 @@ class CardsController extends BaseController {
     if (!parentId) {
       let parentNum = 0;
       for (let card of cards) {
-        if (!card.parentCard) {
+        if (!card.parentCard.trim()) {
             card.wbs = ++parentNum;
-            this.assignWbs(cards, card._id, parentNum)
+            cards = this.assignWbs(cards, card._id, parentNum)
         }
       }
+      console.log({
+        cards
+      })
     } else {
         let childNum = 0;
         for (let card of cards) {
             if (card.parentCard == parentId) {
                 card.wbs = wbs + "." + ++childNum;
-                this.assignWbs(cards, card._id, card.wbs)
+                cards = this.assignWbs(cards, card._id, card.wbs)
             }
         }
     }
+    return cards;
   };
 
   // retrieve and return all card/ retrive and return a single card
@@ -103,7 +107,7 @@ class CardsController extends BaseController {
     if (cards) {
       return res
         .status(200)
-        .json({ message: "card fetched successfully", details: cards });
+        .json({ message: "card fetched successfully", details: cardsWithWbs });
     }
     return res.status(200).json({ message: "issue with card fetching" });
   };
