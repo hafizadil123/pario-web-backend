@@ -22,6 +22,7 @@ routes.get('/api/cards', authenticate,CardsController.findAll);
 routes.put('/api/cards', CardsController.update);
 routes.get('/api/cards/:id', authenticate, CardsController.findOne);
 routes.delete('/api/cards', CardsController.delete);
+routes.get('/api/download', CardsController.download);
 
 
 

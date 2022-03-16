@@ -24,7 +24,7 @@ const defaultConfig = {
    */
 	mongo: {
 		seed: true,
-		uri: 'mongodb+srv://adilsikandar:adil1234@cluster0.c77nh.mongodb.net/pario-web-backend',
+		uri: 'mongodb+srv://adilsikandar:adil1234@cluster0.c77nh.mongodb.net/pario-web-backend-1',
 		options: {
 			db: {
 				safe: true
@@ -46,7 +46,7 @@ const defaultConfig = {
 const environmentConfigs = {
 	development: {
 		mongo: {
-			uri: process.env.MONGO_URI || 'mongodb+srv://adilsikandar:adil1234@cluster0.c77nh.mongodb.net/pario-web-backend'
+			uri: process.env.MONGO_URI || 'mongodb+srv://adilsikandar:adil1234@cluster0.c77nh.mongodb.net/pario-web-backend-1'
 		},
 		security: {
 			saltRounds: 4
@@ -55,7 +55,7 @@ const environmentConfigs = {
 	test: {
 		port: 27017,
 		mongo: {
-			uri: process.env.MONGO_URI || 'mongodb+srv://adilsikandar:adil1234@cluster0.c77nh.mongodb.net/pario-web-backend'
+			uri: process.env.MONGO_URI || 'mongodb+srv://adilsikandar:adil1234@cluster0.c77nh.mongodb.net/pario-web-backend-1'
 		},
 		security: {
 			saltRounds: 4
@@ -64,7 +64,7 @@ const environmentConfigs = {
 	production: {
 		mongo: {
 			seed: false,
-			uri: process.env.MONGO_URI || 'mongodb+srv://adilsikandar:adil1234@cluster0.c77nh.mongodb.net/pario-web-backend'
+			uri: process.env.MONGO_URI || 'mongodb+srv://adilsikandar:adil1234@cluster0.c77nh.mongodb.net/pario-web-backend-1'
 		}
 	}
 };

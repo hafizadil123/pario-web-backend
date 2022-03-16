@@ -1,6 +1,8 @@
 
 var Card = require("../models/card");
 import BaseController from "./base.controller";
+const CsvParser = require("json2csv").Parser;
+
 
 // create and save new card
 class CardsController extends BaseController {
@@ -75,6 +77,7 @@ class CardsController extends BaseController {
       .json({ message: "Issue with card creation", success: false });
   };
 
+
   assignWbs = (cards, parentId, wbs) => {
     if (!parentId) {
       let parentNum = 0;
@@ -97,6 +100,28 @@ class CardsController extends BaseController {
         }
     }
     return cards;
+  };
+
+  download = async (req, res) => {
+    // const userId = req.user.id;
+    // console.log('userId', userId);
+    const cards = await Card.find({}).lean().select('parentCard id cardName estDuraiton successor predecessor effort wbs').exec();
+    const cardsWithWbs = this.assignWbs(cards);
+
+    const csvFields = ["id", "parentCard", "cardName", "predecessor", "successor", "estDuration"];
+    const csvParser = new CsvParser({ csvFields });
+    console.log('card', cardsWithWbs);
+    const csvData = csvParser.parse(cardsWithWbs);
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=cards.csv");
+    res.status(200).end(csvData);
+    if (cards) {
+      return res
+        .status(200)
+        .json({ message: "card fetched successfully", details: cardsWithWbs });
+    }
+    return res.status(200).json({ message: "issue with card fetching" });
+ 
   };
 
   // retrieve and return all card/ retrive and return a single card
